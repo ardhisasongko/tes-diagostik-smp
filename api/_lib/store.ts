@@ -31,8 +31,9 @@ export async function getStudents(): Promise<StoredStudent[]> {
   try {
     const { blobs } = await list({ prefix: STUDENTS_PATH });
     if (!blobs || blobs.length === 0) return [];
-    const newest = blobs[blobs.length - 1];
-    const res = await fetch(newest.url);
+    const newest = [...blobs].sort((a, b) => (b.uploadedAt || 0) - (a.uploadedAt || 0))[0];
+    const sep = newest.url.includes('?') ? '&' : '?';
+    const res = await fetch(`${newest.url}${sep}v=${Date.now()}`, { cache: 'no-store' });
     if (!res.ok) return [];
     const parsed = await res.json();
     return Array.isArray(parsed) ? parsed : [];
