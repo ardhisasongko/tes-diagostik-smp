@@ -1,0 +1,6 @@
+{
+  "name": "Asesmen Diagnostik Bahasa Inggris SMP PLUS AT-THAHIRIN",
+  "description": "Aplikasi evaluasi cepat 15 menit Asesmen Awal Diagnostik Bahasa Inggris Kelas 9 SMP PLUS AT-THAHIRIN berbasis AI Gemini sesuai rubrik Listening, Writing, dan Speaking.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
