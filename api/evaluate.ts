@@ -2,6 +2,10 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { evaluateWithGemini, ruleBasedEvaluation } from './_lib/evaluator.js';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
+  if (req.method === 'GET') {
+    return res.json({ status: 'ok', message: 'API evaluasi aktif. Gunakan POST untuk evaluasi.', apiKeySet: Boolean(process.env.GEMINI_API_KEY || process.env.GEMINI_APP_KEY) });
+  }
+
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }

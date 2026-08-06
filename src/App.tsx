@@ -243,7 +243,15 @@ export default function App() {
         body: JSON.stringify({ students: payload })
       });
 
-      const data = await response.json();
+      const rawText = await response.text();
+      let data: any;
+      try {
+        data = JSON.parse(rawText);
+      } catch {
+        throw new Error(
+          `Server merespons bukan JSON (HTTP ${response.status}). Cek koneksi/URL: ${window.location.origin} — pesan server: ${rawText.slice(0, 120)}`
+        );
+      }
 
       if (data.success && Array.isArray(data.results)) {
         const updatedStudents = students.map(s => {
