@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { ruleBasedEvaluation } from './_lib/evaluator';
+import { ruleBasedEvaluation } from './_lib/evaluator.js';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'POST') {

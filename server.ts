@@ -1,7 +1,7 @@
 import express from "express";
 import path from "path";
 import { createServer as createViteServer } from "vite";
-import { evaluateWithGemini, ruleBasedEvaluation } from "./api/_lib/evaluator";
+import { evaluateWithGemini, ruleBasedEvaluation } from "./api/_lib/evaluator.js";
 
 async function startServer() {
   const app = express();
