@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { evaluateWithGemini, ruleBasedEvaluation } from '../shared/evaluator';
+import { evaluateWithGemini, ruleBasedEvaluation } from './_lib/evaluator';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'POST') {
