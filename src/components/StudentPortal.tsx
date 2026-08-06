@@ -260,9 +260,9 @@ export const StudentPortal: React.FC<StudentPortalProps> = ({
         </div>
 
         <div className="space-y-1">
-          <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white flex items-center gap-2">
+          <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white flex flex-wrap items-center gap-x-2 gap-y-1">
             <span>Asesmen Awal Bahasa Inggris</span>
-            <span className="bg-amber-500 text-slate-950 text-xs sm:text-sm font-black px-2.5 py-0.5 rounded-full shadow">
+            <span className="bg-amber-500 text-slate-950 text-xs sm:text-sm font-black px-2.5 py-0.5 rounded-full shadow whitespace-nowrap">
               {currentMaterial.gradeLabel}
             </span>
           </h1>
@@ -354,9 +354,9 @@ export const StudentPortal: React.FC<StudentPortalProps> = ({
               <Headphones className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="text-base font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
+              <h2 className="text-base font-extrabold text-slate-900 dark:text-white flex flex-wrap items-center gap-x-2 gap-y-1">
                 <span>Bagian 1: Listening (Menyimak)</span>
-                <span className="text-xs bg-indigo-100 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300 font-bold px-2 py-0.5 rounded-full">
+                <span className="text-xs bg-indigo-100 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300 font-bold px-2 py-0.5 rounded-full whitespace-nowrap">
                   Topik: {currentMaterial.title}
                 </span>
               </h2>
@@ -390,13 +390,13 @@ export const StudentPortal: React.FC<StudentPortalProps> = ({
               </div>
 
               {/* Speech Rate Controls */}
-              <div className="flex items-center space-x-2 bg-slate-800/80 p-1.5 rounded-xl border border-slate-700/80 self-start sm:self-auto">
-                <Gauge className="w-3.5 h-3.5 text-indigo-400 ml-1.5" />
+              <div className="flex flex-wrap items-center gap-x-2 gap-y-1 bg-slate-800/80 p-1.5 rounded-xl border border-slate-700/80 self-start sm:self-auto">
+                <Gauge className="w-3.5 h-3.5 text-indigo-400 ml-1.5 shrink-0" />
                 <span className="text-[11px] text-slate-400 font-semibold">Kecepatan:</span>
                 <button
                   type="button"
                   onClick={() => setSpeechRate(0.75)}
-                  className={`px-2.5 py-1 rounded-lg text-xs font-bold transition ${
+                  className={`px-2 py-1 rounded-lg text-[11px] font-bold transition whitespace-nowrap ${
                     speechRate === 0.75 ? 'bg-indigo-600 text-white shadow' : 'text-slate-300 hover:text-white'
                   }`}
                 >
@@ -405,7 +405,7 @@ export const StudentPortal: React.FC<StudentPortalProps> = ({
                 <button
                   type="button"
                   onClick={() => setSpeechRate(1.0)}
-                  className={`px-2.5 py-1 rounded-lg text-xs font-bold transition ${
+                  className={`px-2 py-1 rounded-lg text-[11px] font-bold transition whitespace-nowrap ${
                     speechRate === 1.0 ? 'bg-indigo-600 text-white shadow' : 'text-slate-300 hover:text-white'
                   }`}
                 >
@@ -415,22 +415,22 @@ export const StudentPortal: React.FC<StudentPortalProps> = ({
             </div>
 
             {/* Play & Stop Buttons */}
-            <div className="flex items-center justify-between gap-3 pt-1">
-              <div className="flex items-center space-x-2">
+            <div className="flex flex-wrap items-center justify-between gap-3 pt-1">
+              <div className="flex flex-wrap items-center gap-2">
                 <button
                   type="button"
                   onClick={handlePlayAudio}
-                  className="px-5 py-3 rounded-2xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold text-xs sm:text-sm transition shadow-lg shadow-amber-500/20 flex items-center space-x-2"
+                  className="px-4 sm:px-5 py-3 rounded-2xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold text-xs sm:text-sm transition shadow-lg shadow-amber-500/20 flex items-center space-x-2"
                 >
                   {isPlayingAudio ? (
                     <>
-                      <Pause className="w-4 h-4 text-slate-950" />
+                      <Pause className="w-4 h-4 text-slate-950 shrink-0" />
                       <span>Jeda Audio</span>
                     </>
                   ) : (
                     <>
-                      <Play className="w-4 h-4 text-slate-950 fill-current" />
-                      <span>{timesPlayed === 0 ? `▶ Putar Audio ${currentMaterial.title}` : '▶ Putar Ulang Audio'}</span>
+                      <Play className="w-4 h-4 text-slate-950 fill-current shrink-0" />
+                      <span>{timesPlayed === 0 ? `Putar Audio ${currentMaterial.title}` : 'Putar Ulang Audio'}</span>
                     </>
                   )}
                 </button>
@@ -447,7 +447,7 @@ export const StudentPortal: React.FC<StudentPortalProps> = ({
                 )}
               </div>
 
-              <div className="text-right">
+              <div className="text-right shrink-0">
                 <span className="text-xs font-bold text-indigo-300 block">
                   Diputar: <span className="text-white font-black">{timesPlayed} kali</span>
                 </span>
@@ -470,11 +470,11 @@ export const StudentPortal: React.FC<StudentPortalProps> = ({
           </div>
 
           <div className="space-y-3 pt-2">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-wrap items-center justify-between gap-2">
               <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
                 Pilih 5 kata kunci Bahasa Inggris {currentMaterial.gradeLabel} yang ada dalam audio:
               </label>
-              <span className={`text-[11px] font-black px-2.5 py-1 rounded-full border ${
+              <span className={`text-[11px] font-black px-2.5 py-1 rounded-full border whitespace-nowrap shrink-0 ${
                 selectedKeywords.length === 5
                   ? 'bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 border-emerald-300'
                   : selectedKeywords.length > 5
@@ -493,13 +493,13 @@ export const StudentPortal: React.FC<StudentPortalProps> = ({
                     key={kw}
                     type="button"
                     onClick={() => handleToggleKeyword(kw)}
-                    className={`px-3.5 py-3 rounded-2xl text-xs font-extrabold border transition flex items-center justify-between min-h-[48px] ${
+                    className={`px-3 py-3 rounded-2xl text-xs font-extrabold border transition flex items-center justify-between gap-1.5 min-h-[48px] min-w-0 ${
                       isChecked
                         ? 'bg-indigo-600 text-white border-indigo-600 shadow-md scale-[1.02]'
                         : 'bg-slate-50 dark:bg-slate-800/80 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-indigo-300'
                     }`}
                   >
-                    <span className="capitalize">{kw}</span>
+                    <span className="capitalize break-words leading-tight text-left">{kw}</span>
                     {isChecked && <CheckCircle2 className="w-4 h-4 text-white shrink-0" />}
                   </button>
                 );
