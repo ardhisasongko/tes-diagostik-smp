@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { evaluateWithGemini, ruleBasedEvaluation } from './_lib/evaluator.js';
-import { upsertStudent, isStoreConfigured } from './_lib/store.js';
+import { saveStudents, isStoreConfigured } from './_lib/store.js';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'POST') {
@@ -53,7 +53,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
   };
 
-  await upsertStudent(record);
+  await saveStudents([record]);
 
   return res.json({ success: true, student: record, storeConfigured: isStoreConfigured() });
 }
