@@ -469,12 +469,24 @@ export const StudentPortal: React.FC<StudentPortalProps> = ({
             )}
           </div>
 
-          <div className="space-y-2 pt-2">
-            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
-              Centang 5 kata kunci Bahasa Inggris {currentMaterial.gradeLabel} yang berhasil kamu dengar:
-            </label>
+          <div className="space-y-3 pt-2">
+            <div className="flex items-center justify-between">
+              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
+                Pilih 5 kata kunci Bahasa Inggris {currentMaterial.gradeLabel} yang ada dalam audio:
+              </label>
+              <span className={`text-[11px] font-black px-2.5 py-1 rounded-full border ${
+                selectedKeywords.length === 5
+                  ? 'bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 border-emerald-300'
+                  : selectedKeywords.length > 5
+                  ? 'bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300 border-amber-300'
+                  : 'bg-indigo-50 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300 border-indigo-200'
+              }`}>
+                Terpilih: {selectedKeywords.length} / 5 Kata
+              </span>
+            </div>
+
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
-              {currentMaterial.listeningKeywords.map((kw) => {
+              {currentMaterial.listeningOptions.map((kw) => {
                 const isChecked = selectedKeywords.includes(kw);
                 return (
                   <button

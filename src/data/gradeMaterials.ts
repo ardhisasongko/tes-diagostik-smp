@@ -4,6 +4,7 @@ export interface GradeMaterial {
   title: string;
   listeningScript: string;
   listeningKeywords: string[];
+  listeningOptions: string[];
   listeningInstruction: string;
   writingTitle: string;
   writingInstruction: string;
@@ -21,7 +22,8 @@ export const GRADE_MATERIALS: Record<'7' | '8' | '9', GradeMaterial> = {
     title: 'My Family',
     listeningScript: 'Hello, my name is Dina. I have a small family. My father is a teacher and my mother is a nurse. I have one brother. His name is Budi. We live in a small house near the school. I love my family very much.',
     listeningKeywords: ['family', 'teacher', 'nurse', 'brother', 'house'],
-    listeningInstruction: 'Dengarkan teks audio tentang "My Family", lalu centang 5 kata kunci yang kamu dengar dari rekaman:',
+    listeningOptions: ['family', 'doctor', 'teacher', 'sister', 'nurse', 'apartment', 'brother', 'farmer', 'house', 'market'],
+    listeningInstruction: 'Dengarkan teks audio tentang "My Family", lalu centang 5 kata kunci yang kamu dengar dari rekaman (di antara pilihan di bawah):',
     writingTitle: 'Bagian 2: Writing (Menulis 5 Kalimat)',
     writingInstruction: 'Tuliskan 5 kalimat Bahasa Inggris sederhana tentang diri dan anggota keluargamu (My Family).',
     writingTargetPatterns: ['my name is', 'is a', 'have', 'live in', 'love'],
@@ -36,7 +38,8 @@ export const GRADE_MATERIALS: Record<'7' | '8' | '9', GradeMaterial> = {
     title: 'My Weekend',
     listeningScript: 'Last weekend, my friends and I went to the beach. We swam in the sea and played volleyball. After that, we ate fried rice at a small restaurant. It was tiring but very fun. I want to go there again next month.',
     listeningKeywords: ['weekend', 'beach', 'swam', 'volleyball', 'restaurant'],
-    listeningInstruction: 'Dengarkan teks audio tentang "My Weekend", lalu centang 5 kata kunci yang kamu dengar dari rekaman:',
+    listeningOptions: ['weekend', 'mountain', 'beach', 'soccer', 'swam', 'pizza', 'volleyball', 'slept', 'restaurant', 'cinema'],
+    listeningInstruction: 'Dengarkan teks audio tentang "My Weekend", lalu centang 5 kata kunci yang kamu dengar dari rekaman (di antara pilihan di bawah):',
     writingTitle: 'Bagian 2: Writing (Menulis 5 Kalimat)',
     writingInstruction: 'Tuliskan 5 kalimat Bahasa Inggris tentang pengalaman liburan atau kegiatan akhir pekanmu (Simple Past / Recount).',
     writingTargetPatterns: ['last weekend', 'went to', 'played', 'ate', 'was'],
@@ -51,7 +54,8 @@ export const GRADE_MATERIALS: Record<'7' | '8' | '9', GradeMaterial> = {
     title: 'Future Plans & Hobbies',
     listeningScript: 'Hello everyone! Welcome to Grade 9 English class. Today, I want to talk about my future plans. After graduating, I plan to attend a vocational school to study digital technology. In my spare time, I love listening to music, reading comic books, and taking pictures with my camera. I also practice speaking English every day because I want to join an international exchange program next year. What are your plans?',
     listeningKeywords: ['vocational school', 'digital technology', 'comic books', 'camera', 'exchange program'],
-    listeningInstruction: 'Dengarkan teks audio tentang "Future Plans & Hobbies", lalu centang 5 kata kunci yang kamu dengar dari rekaman:',
+    listeningOptions: ['vocational school', 'medical university', 'digital technology', 'football match', 'comic books', 'cooking class', 'camera', 'piano', 'exchange program', 'sports club'],
+    listeningInstruction: 'Dengarkan teks audio tentang "Future Plans & Hobbies", lalu centang 5 kata kunci yang kamu dengar dari rekaman (di antara pilihan di bawah):',
     writingTitle: 'Bagian 2: Writing (Menulis 5 Kalimat)',
     writingInstruction: 'Tuliskan 5 kalimat Bahasa Inggris sederhana tentang cita-cita / rencana masa depanmu (Future Plans).',
     writingTargetPatterns: ['want to', 'because', 'plan to'],
