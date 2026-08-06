@@ -417,7 +417,7 @@ export default function App() {
       if (selectedStudentReport?.id === id) {
         setSelectedStudentReport(null);
       }
-      fetch(`/api/students/${encodeURIComponent(id)}`, { method: 'DELETE' }).catch((e) =>
+      fetch(`/api/students?id=${encodeURIComponent(id)}`, { method: 'DELETE' }).catch((e) =>
         console.error('Gagal menghapus data di server:', e)
       );
     }
