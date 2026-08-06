@@ -8,7 +8,8 @@ import {
   BookOpen, 
   Copy, 
   Check,
-  FileSpreadsheet
+  FileSpreadsheet,
+  Lock
 } from 'lucide-react';
 
 interface NavbarProps {
@@ -18,6 +19,8 @@ interface NavbarProps {
   totalCount: number;
   onOpenPromptModal: () => void;
   onExportCSV: () => void;
+  teacherMode: boolean;
+  onLockForStudents: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -26,7 +29,9 @@ export const Navbar: React.FC<NavbarProps> = ({
   evaluatedCount,
   totalCount,
   onOpenPromptModal,
-  onExportCSV
+  onExportCSV,
+  teacherMode,
+  onLockForStudents
 }) => {
   return (
     <header className="bg-slate-900 text-white shadow-md border-b border-slate-800 sticky top-0 z-30">
@@ -58,28 +63,32 @@ export const Navbar: React.FC<NavbarProps> = ({
 
           {/* Quick Actions & System Prompt Copy */}
           <div className="flex items-center space-x-2">
-            <button
-              onClick={onOpenPromptModal}
-              className="px-2.5 sm:px-3 py-2 sm:py-1.5 text-xs font-bold rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition flex items-center space-x-1.5 min-h-[40px] sm:min-h-0"
-              title="Lihat & Salin Instruksi Sistem untuk AI Studio"
-            >
-              <Copy className="w-4 h-4 text-amber-400 shrink-0" />
-              <span className="hidden sm:inline">Instruksi System AI Studio</span>
-              <span className="sm:hidden text-[11px]">Prompt</span>
-            </button>
+            {teacherMode && (
+              <>
+                <button
+                  onClick={onOpenPromptModal}
+                  className="px-2.5 sm:px-3 py-2 sm:py-1.5 text-xs font-bold rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition flex items-center space-x-1.5 min-h-[40px] sm:min-h-0"
+                  title="Lihat & Salin Instruksi Sistem untuk AI Studio"
+                >
+                  <Copy className="w-4 h-4 text-amber-400 shrink-0" />
+                  <span className="hidden sm:inline">Instruksi System AI Studio</span>
+                  <span className="sm:hidden text-[11px]">Prompt</span>
+                </button>
 
-            <button
-              onClick={onExportCSV}
-              className="px-2.5 sm:px-3 py-2 sm:py-1.5 text-xs font-bold rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white transition flex items-center space-x-1.5 shadow-sm min-h-[40px] sm:min-h-0"
-              title="Ekspor CSV / Excel"
-            >
-              <FileSpreadsheet className="w-4 h-4 shrink-0" />
-              <span className="hidden sm:inline">Ekspor CSV</span>
-            </button>
+                <button
+                  onClick={onExportCSV}
+                  className="px-2.5 sm:px-3 py-2 sm:py-1.5 text-xs font-bold rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white transition flex items-center space-x-1.5 shadow-sm min-h-[40px] sm:min-h-0"
+                  title="Ekspor CSV / Excel"
+                >
+                  <FileSpreadsheet className="w-4 h-4 shrink-0" />
+                  <span className="hidden sm:inline">Ekspor CSV</span>
+                </button>
 
-            <div className="hidden lg:flex bg-slate-800/80 px-3 py-1 rounded-xl border border-slate-700 text-xs text-slate-300">
-              Evaluasi: <span className="text-emerald-400 font-bold ml-1">{evaluatedCount}</span>/{totalCount} Siswa
-            </div>
+                <div className="hidden lg:flex bg-slate-800/80 px-3 py-1 rounded-xl border border-slate-700 text-xs text-slate-300">
+                  Evaluasi: <span className="text-emerald-400 font-bold ml-1">{evaluatedCount}</span>/{totalCount} Siswa
+                </div>
+              </>
+            )}
           </div>
         </div>
 
@@ -94,58 +103,71 @@ export const Navbar: React.FC<NavbarProps> = ({
             }`}
           >
             <GraduationCap className="w-4 h-4 shrink-0" />
-            <span>Mode Siswa (Isi Mandiri)</span>
+            <span>{teacherMode ? 'Mode Siswa (Isi Mandiri)' : 'Isi Asesmen Siswa'}</span>
           </button>
 
-          <div className="w-px h-6 bg-slate-800 my-auto mx-1 shrink-0" />
+          {teacherMode && (
+            <>
+              <div className="w-px h-6 bg-slate-800 my-auto mx-1 shrink-0" />
 
-          <button
-            onClick={() => setActiveTab('dashboard')}
-            className={`flex items-center space-x-2 px-3.5 py-2.5 text-xs sm:text-sm font-bold rounded-xl transition whitespace-nowrap min-h-[44px] ${
-              activeTab === 'dashboard'
-                ? 'bg-indigo-600 text-white shadow'
-                : 'text-slate-300 hover:bg-slate-800 hover:text-white'
-            }`}
-          >
-            <LayoutDashboard className="w-4 h-4 shrink-0" />
-            <span>Dashboard Guru</span>
-          </button>
+              <button
+                onClick={() => setActiveTab('dashboard')}
+                className={`flex items-center space-x-2 px-3.5 py-2.5 text-xs sm:text-sm font-bold rounded-xl transition whitespace-nowrap min-h-[44px] ${
+                  activeTab === 'dashboard'
+                    ? 'bg-indigo-600 text-white shadow'
+                    : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                }`}
+              >
+                <LayoutDashboard className="w-4 h-4 shrink-0" />
+                <span>Dashboard Guru</span>
+              </button>
 
-          <button
-            onClick={() => setActiveTab('form')}
-            className={`flex items-center space-x-2 px-3.5 py-2.5 text-xs sm:text-sm font-bold rounded-xl transition whitespace-nowrap min-h-[44px] ${
-              activeTab === 'form'
-                ? 'bg-indigo-600 text-white shadow'
-                : 'text-slate-300 hover:bg-slate-800 hover:text-white'
-            }`}
-          >
-            <UserPlus className="w-4 h-4 shrink-0" />
-            <span>+ Input & Evaluasi</span>
-          </button>
+              <button
+                onClick={() => setActiveTab('form')}
+                className={`flex items-center space-x-2 px-3.5 py-2.5 text-xs sm:text-sm font-bold rounded-xl transition whitespace-nowrap min-h-[44px] ${
+                  activeTab === 'form'
+                    ? 'bg-indigo-600 text-white shadow'
+                    : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                }`}
+              >
+                <UserPlus className="w-4 h-4 shrink-0" />
+                <span>+ Input & Evaluasi</span>
+              </button>
 
-          <button
-            onClick={() => setActiveTab('list')}
-            className={`flex items-center space-x-2 px-3.5 py-2.5 text-xs sm:text-sm font-bold rounded-xl transition whitespace-nowrap min-h-[44px] ${
-              activeTab === 'list'
-                ? 'bg-indigo-600 text-white shadow'
-                : 'text-slate-300 hover:bg-slate-800 hover:text-white'
-            }`}
-          >
-            <Users className="w-4 h-4 shrink-0" />
-            <span>Daftar Siswa ({totalCount})</span>
-          </button>
+              <button
+                onClick={() => setActiveTab('list')}
+                className={`flex items-center space-x-2 px-3.5 py-2.5 text-xs sm:text-sm font-bold rounded-xl transition whitespace-nowrap min-h-[44px] ${
+                  activeTab === 'list'
+                    ? 'bg-indigo-600 text-white shadow'
+                    : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                }`}
+              >
+                <Users className="w-4 h-4 shrink-0" />
+                <span>Daftar Siswa ({totalCount})</span>
+              </button>
 
-          <button
-            onClick={() => setActiveTab('rubric')}
-            className={`flex items-center space-x-2 px-3.5 py-2.5 text-xs sm:text-sm font-bold rounded-xl transition whitespace-nowrap min-h-[44px] ${
-              activeTab === 'rubric'
-                ? 'bg-indigo-600 text-white shadow'
-                : 'text-slate-300 hover:bg-slate-800 hover:text-white'
-            }`}
-          >
-            <BookOpen className="w-4 h-4 shrink-0" />
-            <span>Rubrik Asesmen</span>
-          </button>
+              <button
+                onClick={() => setActiveTab('rubric')}
+                className={`flex items-center space-x-2 px-3.5 py-2.5 text-xs sm:text-sm font-bold rounded-xl transition whitespace-nowrap min-h-[44px] ${
+                  activeTab === 'rubric'
+                    ? 'bg-indigo-600 text-white shadow'
+                    : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                }`}
+              >
+                <BookOpen className="w-4 h-4 shrink-0" />
+                <span>Rubrik Asesmen</span>
+              </button>
+
+              <button
+                onClick={onLockForStudents}
+                className="flex items-center space-x-2 px-3.5 py-2.5 text-xs sm:text-sm font-bold rounded-xl transition whitespace-nowrap min-h-[44px] text-rose-300 hover:bg-rose-500/10 border border-rose-500/30"
+                title="Sembunyikan tombol guru & kunci untuk siswa"
+              >
+                <Lock className="w-4 h-4 shrink-0" />
+                <span>Kunci untuk Siswa</span>
+              </button>
+            </>
+          )}
         </div>
       </div>
     </header>

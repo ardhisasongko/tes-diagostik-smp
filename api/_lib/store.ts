@@ -1,6 +1,7 @@
 import { put, list, del } from '@vercel/blob';
 
 const PREFIX = 'students/';
+const SETTINGS_PATH = 'settings.json';
 
 const pathFor = (id: string) => `${PREFIX}${encodeURIComponent(id)}.json`;
 const idFromPath = (p: string) => decodeURIComponent(p.slice(PREFIX.length, -'.json'.length));
@@ -59,4 +60,28 @@ export async function saveStudents(students: StoredStudent[]): Promise<StoredStu
 export async function deleteStudent(id: string): Promise<void> {
   if (!isStoreConfigured()) return;
   await del(pathFor(id));
+}
+
+export async function getSettings(): Promise<{ teacherMode?: boolean }> {
+  if (!isStoreConfigured()) return {};
+  try {
+    const { blobs } = await list({ prefix: SETTINGS_PATH });
+    if (!blobs || blobs.length === 0) return {};
+    const newest = [...blobs].sort(
+      (a, b) => new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime()
+    )[0];
+    const sep = newest.url.includes('?') ? '&' : '?';
+    const res = await fetch(`${newest.url}${sep}v=${Date.now()}`, { cache: 'no-store' });
+    if (!res.ok) return {};
+    const parsed = await res.json();
+    return parsed && typeof parsed === 'object' ? parsed : {};
+  } catch (err) {
+    console.error('Blob settings get error:', err);
+    return {};
+  }
+}
+
+export async function saveSettings(settings: { teacherMode: boolean }): Promise<void> {
+  if (!isStoreConfigured()) return;
+  await put(SETTINGS_PATH, JSON.stringify(settings), { access: 'public', allowOverwrite: true });
 }

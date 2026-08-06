@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { X } from 'lucide-react';
 import { Navbar } from './components/Navbar';
 import { StudentPortal } from './components/StudentPortal';
 import { StudentForm } from './components/StudentForm';
@@ -39,6 +40,77 @@ export default function App() {
   const [isPromptModalOpen, setIsPromptModalOpen] = useState(false);
   const [hasCopiedPrompt, setHasCopiedPrompt] = useState(false);
   const [isEvaluatingId, setIsEvaluatingId] = useState<string | null>(null);
+  const [teacherMode, setTeacherMode] = useState<boolean>(true);
+  const [isPinModalOpen, setIsPinModalOpen] = useState(false);
+  const [pinValue, setPinValue] = useState('');
+  const [pinError, setPinError] = useState('');
+  const [isUnlocking, setIsUnlocking] = useState(false);
+
+  // Load shared settings from server once on mount
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await fetch('/api/settings');
+        const data = await res.json();
+        if (data && typeof data.teacherMode === 'boolean') {
+          setTeacherMode(data.teacherMode);
+        }
+      } catch (e) {
+        console.error("Gagal memuat pengaturan dari server:", e);
+      }
+    })();
+  }, []);
+
+  // When locked for students, always show the student portal
+  useEffect(() => {
+    if (!teacherMode && activeTab !== 'student-portal') {
+      setActiveTab('student-portal');
+    }
+  }, [teacherMode, activeTab]);
+
+  const handleSetTeacherMode = async (mode: boolean, pin?: string) => {
+    try {
+      const response = await fetch('/api/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(mode ? { teacherMode: true, pin } : { teacherMode: false })
+      });
+      const data = await response.json();
+      if (!data.success) {
+        throw new Error(data.error || 'Gagal mengubah pengaturan.');
+      }
+      setTeacherMode(data.teacherMode);
+      if (data.teacherMode) {
+        setIsPinModalOpen(false);
+        setPinValue('');
+        setPinError('');
+      }
+      return data;
+    } catch (err: any) {
+      throw err;
+    }
+  };
+
+  const handleSubmitPin = async () => {
+    setIsUnlocking(true);
+    setPinError('');
+    try {
+      await handleSetTeacherMode(true, pinValue);
+    } catch (err: any) {
+      setPinError(err.message || 'PIN salah.');
+    } finally {
+      setIsUnlocking(false);
+    }
+  };
+
+  const handleLockForStudents = async () => {
+    if (!confirm('Kunci aplikasi untuk siswa? Semua tombol guru akan disembunyikan hingga PIN dibuka kembali.')) return;
+    try {
+      await handleSetTeacherMode(false);
+    } catch (err: any) {
+      alert(`Gagal mengunci: ${err.message}`);
+    }
+  };
 
   // Student portal submission handler (Self-assessment)
   const handleStudentPortalSubmit = async (
@@ -474,6 +546,8 @@ Tentukan level berdasarkan mayoritas warna:
         totalCount={students.length}
         onOpenPromptModal={() => setIsPromptModalOpen(true)}
         onExportCSV={handleExportCSV}
+        teacherMode={teacherMode}
+        onLockForStudents={handleLockForStudents}
       />
 
       {/* Main Body Content */}
@@ -482,6 +556,8 @@ Tentukan level berdasarkan mayoritas warna:
           <StudentPortal
             onSubmitStudent={handleStudentPortalSubmit}
             onSwitchToTeacherMode={() => setActiveTab('dashboard')}
+            teacherMode={teacherMode}
+            onRequestUnlock={() => setIsPinModalOpen(true)}
           />
         )}
 
@@ -552,6 +628,64 @@ Tentukan level berdasarkan mayoritas warna:
         isOpen={isPromptModalOpen}
         onClose={() => setIsPromptModalOpen(false)}
       />
+
+      {/* PIN Unlock Modal (Mode Guru) */}
+      {isPinModalOpen && (
+        <div className="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="w-full max-w-sm bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xl p-6 space-y-4">
+            <div className="flex items-start justify-between">
+              <div className="space-y-1">
+                <h3 className="text-lg font-extrabold text-slate-900 dark:text-white">
+                  Mode Guru
+                </h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  Masukkan PIN guru untuk membuka tombol Dashboard, Evaluasi, dan Rubrik.
+                </p>
+              </div>
+              <button
+                onClick={() => {
+                  setIsPinModalOpen(false);
+                  setPinValue('');
+                  setPinError('');
+                }}
+                className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <input
+              type="password"
+              inputMode="numeric"
+              autoFocus
+              placeholder="PIN Guru"
+              value={pinValue}
+              onChange={(e) => {
+                setPinValue(e.target.value);
+                setPinError('');
+              }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') handleSubmitPin();
+              }}
+              className="w-full px-4 py-3 rounded-2xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-white text-sm text-center tracking-[0.3em] font-bold focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+            />
+
+            {pinError && (
+              <p className="text-xs font-bold text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/60 border border-rose-200 dark:border-rose-900 rounded-xl px-3 py-2">
+                {pinError}
+              </p>
+            )}
+
+            <button
+              onClick={handleSubmitPin}
+              disabled={isUnlocking}
+              className="w-full py-3 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white font-extrabold text-sm transition disabled:opacity-50 shadow-lg shadow-indigo-600/20"
+            >
+              {isUnlocking ? 'Memeriksa PIN...' : 'Buka Mode Guru'}
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Simple Footer */}
       <footer className="bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 py-4 text-center text-xs text-slate-500">

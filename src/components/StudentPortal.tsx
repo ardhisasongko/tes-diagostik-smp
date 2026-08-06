@@ -35,11 +35,15 @@ interface StudentPortalProps {
     className?: string
   ) => void;
   onSwitchToTeacherMode: () => void;
+  teacherMode: boolean;
+  onRequestUnlock: () => void;
 }
 
 export const StudentPortal: React.FC<StudentPortalProps> = ({
   onSubmitStudent,
-  onSwitchToTeacherMode
+  onSwitchToTeacherMode,
+  teacherMode,
+  onRequestUnlock
 }) => {
   const [selectedGrade, setSelectedGrade] = useState<'7' | '8' | '9'>('7');
   const [studentName, setStudentName] = useState('');
@@ -231,12 +235,14 @@ export const StudentPortal: React.FC<StudentPortalProps> = ({
               + Isi Lagi (Untuk Siswa Lain)
             </button>
             
-            <button
-              onClick={onSwitchToTeacherMode}
-              className="w-full sm:w-auto px-5 py-3 rounded-2xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs sm:text-sm transition border border-slate-300 dark:border-slate-700"
-            >
-              Lihat Dashboard Guru
-            </button>
+            {teacherMode && (
+              <button
+                onClick={onSwitchToTeacherMode}
+                className="w-full sm:w-auto px-5 py-3 rounded-2xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs sm:text-sm transition border border-slate-300 dark:border-slate-700"
+              >
+                Lihat Dashboard Guru
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -251,12 +257,14 @@ export const StudentPortal: React.FC<StudentPortalProps> = ({
           <span className="text-xs font-extrabold uppercase tracking-widest text-indigo-300 flex items-center gap-1.5 bg-indigo-800/50 px-3 py-1 rounded-full border border-indigo-500/30">
             <GraduationCap className="w-4 h-4 text-amber-400" /> SMP PLUS AT-THAHIRIN
           </span>
-          <button
-            onClick={onSwitchToTeacherMode}
-            className="text-xs text-indigo-300 hover:text-white font-semibold underline"
-          >
-            Mode Guru →
-          </button>
+          {teacherMode && (
+            <button
+              onClick={onSwitchToTeacherMode}
+              className="text-xs text-indigo-300 hover:text-white font-semibold underline"
+            >
+              Mode Guru →
+            </button>
+          )}
         </div>
 
         <div className="space-y-1">
@@ -656,6 +664,18 @@ export const StudentPortal: React.FC<StudentPortalProps> = ({
           </button>
         </div>
       </form>
+
+      {!teacherMode && (
+        <div className="pt-2 pb-6 text-center">
+          <button
+            type="button"
+            onClick={onRequestUnlock}
+            className="text-[11px] text-slate-400 hover:text-indigo-500 underline font-semibold opacity-70"
+          >
+            Guru?
+          </button>
+        </div>
+      )}
     </div>
   );
 };
