@@ -63,17 +63,87 @@ export default function App() {
 
     setStudents((prev) => [newRecord, ...prev]);
 
-    // Automatically trigger AI evaluation in background if desired
-    handleReevaluateAI(newRecord);
+    // Save + evaluate on server so results are visible to the teacher on any device
+    try {
+      const response = await fetch('/api/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: newRecord.id,
+          studentName,
+          className,
+          listeningData,
+          writingData,
+          speakingObs,
+          createdAt: newRecord.createdAt
+        })
+      });
+
+      const rawText = await response.text();
+      let data: any;
+      try {
+        data = JSON.parse(rawText);
+      } catch {
+        throw new Error(
+          `Server merespons bukan JSON (HTTP ${response.status}). URL: ${window.location.origin} — pesan server: ${rawText.slice(0, 120)}`
+        );
+      }
+
+      if (!data.success || !data.student) {
+        throw new Error(data.error || 'Gagal mengevaluasi data siswa.');
+      }
+
+      const evaluated: StudentRecord = data.student;
+      setStudents((prev) => prev.map((s) => (s.id === evaluated.id ? evaluated : s)));
+    } catch (err: any) {
+      alert(`Gagal menyimpan/evaluasi jawaban siswa: ${err.message}`);
+    }
   };
 
-  // Save to localStorage on change
+  // Load shared records from server once on mount (merge with local)
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await fetch('/api/students');
+        const data = await res.json();
+        if (data.success && Array.isArray(data.students) && data.students.length > 0) {
+          setStudents((prev) => {
+            const merged = new Map<string, StudentRecord>();
+            for (const s of prev) merged.set(s.id, s);
+            let changed = false;
+            for (const s of data.students as StudentRecord[]) {
+              const cur = merged.get(s.id);
+              if (!cur || JSON.stringify(cur) !== JSON.stringify(s)) {
+                merged.set(s.id, s);
+                changed = true;
+              }
+            }
+            return changed ? Array.from(merged.values()) : prev;
+          });
+        }
+      } catch (e) {
+        console.error("Gagal memuat data siswa dari server:", e);
+      }
+    })();
+  }, []);
+
+  // Save to localStorage + sync to server on change
   useEffect(() => {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(students));
     } catch (e) {
       console.error("Gagal menyimpan ke localStorage:", e);
     }
+
+    if (students.length === 0) return;
+    const t = setTimeout(() => {
+      fetch('/api/students', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ records: students })
+      }).catch((e) => console.error("Gagal sinkron data ke server:", e));
+    }, 600);
+    return () => clearTimeout(t);
   }, [students]);
 
   // Handle single AI evaluation
@@ -126,18 +196,17 @@ export default function App() {
 
       if (editingStudent) {
         // Update existing record
-        const updated = students.map(s => s.id === editingStudent.id ? {
-          ...s,
+        const updatedRecord: StudentRecord = {
+          ...editingStudent,
           studentName,
           className: className || '9A',
           listeningData,
           writingData,
           speakingObs,
           evaluation: evalResult,
-          status: 'evaluated' as const
-        } : s);
-        setStudents(updated);
-        const updatedRecord = updated.find(s => s.id === editingStudent.id)!;
+          status: 'evaluated'
+        };
+        setStudents((prev) => prev.map((s) => (s.id === editingStudent.id ? updatedRecord : s)));
         setSelectedStudentReport(updatedRecord);
         setEditingStudent(null);
       } else {
@@ -153,7 +222,7 @@ export default function App() {
           status: 'evaluated',
           createdAt: new Date().toISOString()
         };
-        setStudents([newRecord, ...students]);
+        setStudents((prev) => [newRecord, ...prev]);
         setSelectedStudentReport(newRecord);
       }
 
@@ -202,14 +271,14 @@ export default function App() {
           isAiEvaluated: !data.isFallback
         };
 
-        const updated = students.map(s => s.id === student.id ? {
-          ...s,
+        const updatedRecord: StudentRecord = {
+          ...student,
           evaluation: evalResult,
-          status: 'evaluated' as const
-        } : s);
+          status: 'evaluated'
+        };
 
-        setStudents(updated);
-        setSelectedStudentReport(updated.find(s => s.id === student.id)!);
+        setStudents((prev) => prev.map((s) => (s.id === student.id ? updatedRecord : s)));
+        setSelectedStudentReport(updatedRecord);
       }
     } catch (err: any) {
       alert(`Gagal mengevaluasi ulang: ${err.message}`);
@@ -254,7 +323,7 @@ export default function App() {
       }
 
       if (data.success && Array.isArray(data.results)) {
-        const updatedStudents = students.map(s => {
+        setStudents((prev) => prev.map((s) => {
           const match = data.results.find((r: any) => r.studentName === s.studentName);
           if (match) {
             return {
@@ -277,9 +346,7 @@ export default function App() {
             };
           }
           return s;
-        });
-
-        setStudents(updatedStudents);
+        }));
         alert(`Berhasil mengevaluasi ${pending.length} siswa secara otomatis!`);
       }
     } catch (err: any) {
@@ -346,7 +413,7 @@ export default function App() {
   // Delete student
   const handleDeleteStudent = (id: string) => {
     if (confirm('Apakah Anda yakin ingin menghapus data siswa ini?')) {
-      setStudents(students.filter(s => s.id !== id));
+      setStudents((prev) => prev.filter((s) => s.id !== id));
       if (selectedStudentReport?.id === id) {
         setSelectedStudentReport(null);
       }
@@ -355,7 +422,7 @@ export default function App() {
 
   // Save Manual
   const handleSaveManual = (record: StudentRecord) => {
-    setStudents([record, ...students]);
+    setStudents((prev) => [record, ...prev]);
     setActiveTab('list');
   };
 
