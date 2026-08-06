@@ -1,5 +1,3 @@
-import { GoogleGenAI, Type } from "@google/genai";
-
 export const SYSTEM_INSTRUCTIONS = `Kamu adalah asisten guru bahasa Inggris SMP PLUS AT-THAHIRIN yang bertugas mengevaluasi Asesmen Awal Cepat (15 menit) untuk siswa Kelas 7, Kelas 8, atau Kelas 9. Analisis data tes siswa berdasarkan tiga aspek (Listening, Writing, dan Speaking) dan tentukan level capaian menggunakan kategori warna (🟩 Hijau, 🟨 Kuning, 🟥 Merah) beserta rencana tindak lanjutnya.
 
 Rubrik Penilaian Berdasarkan Kelas & Topik:
@@ -149,6 +147,17 @@ export async function evaluateWithGemini(studentName: string, listeningData: str
 
   if (!apiKey) {
     return { isFallback: true, ...ruleBasedEvaluation(studentName, listeningData, writingData, speakingObs) };
+  }
+
+  let GoogleGenAI: any;
+  let Type: any;
+  try {
+    const mod = await import('@google/genai');
+    GoogleGenAI = mod.GoogleGenAI;
+    Type = mod.Type;
+  } catch (err) {
+    console.error('Gagal memuat @google/genai:', err);
+    return { isFallback: true, errorMessage: 'Gagal memuat SDK Gemini, menggunakan evaluator aturan lokal.', ...ruleBasedEvaluation(studentName, listeningData, writingData, speakingObs) };
   }
 
   const promptText = `Nama Siswa: ${studentName}
