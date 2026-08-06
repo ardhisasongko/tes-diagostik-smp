@@ -7,7 +7,6 @@ import { StudentListTable } from './components/StudentListTable';
 import { RubricGuide } from './components/RubricGuide';
 import { DiagnosticReportCard } from './components/DiagnosticReportCard';
 import { SystemPromptModal } from './components/SystemPromptModal';
-import { INITIAL_MOCK_STUDENTS } from './data/mockStudents';
 import { 
   StudentRecord, 
   ListeningInput, 
@@ -29,7 +28,7 @@ export default function App() {
     } catch (e) {
       console.error("Gagal membaca localStorage:", e);
     }
-    return INITIAL_MOCK_STUDENTS;
+    return [];
   });
 
   const [activeTab, setActiveTab] = useState<'student-portal' | 'form' | 'dashboard' | 'list' | 'rubric'>('dashboard');
