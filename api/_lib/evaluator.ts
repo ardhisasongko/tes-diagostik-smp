@@ -143,7 +143,7 @@ Rekomendasi Tindak Lanjut: ${recommendation}`;
 }
 
 export async function evaluateWithGemini(studentName: string, listeningData: string, writingData: string, speakingObs: string) {
-  const apiKey = process.env.GEMINI_API_KEY;
+  const apiKey = process.env.GEMINI_API_KEY || process.env.GEMINI_APP_KEY;
 
   if (!apiKey) {
     return { isFallback: true, ...ruleBasedEvaluation(studentName, listeningData, writingData, speakingObs) };
