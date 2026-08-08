@@ -171,27 +171,48 @@ export default function App() {
     }
   };
 
-  // Load shared records from server once on mount (merge with local)
+  // Load shared records on mount & migrasi data local ke server agar tidak tercampur
   useEffect(() => {
     (async () => {
       try {
+        let local: StudentRecord[] = [];
+        try {
+          const raw = localStorage.getItem(STORAGE_KEY);
+          if (raw) local = JSON.parse(raw) || [];
+        } catch {}
+
         const res = await fetch('/api/students');
         const data = await res.json();
-        if (data.success && Array.isArray(data.students) && data.students.length > 0) {
-          setStudents((prev) => {
-            const merged = new Map<string, StudentRecord>();
-            for (const s of prev) merged.set(s.id, s);
-            let changed = false;
-            for (const s of data.students as StudentRecord[]) {
-              const cur = merged.get(s.id);
-              if (!cur || JSON.stringify(cur) !== JSON.stringify(s)) {
-                merged.set(s.id, s);
-                changed = true;
-              }
-            }
-            return changed ? Array.from(merged.values()) : prev;
-          });
+
+        if (!data.success && local.length > 0) {
+          // Server tidak terjangkau — gunakan cache lokal sementara
+          setStudents(local);
+          return;
         }
+
+        const server: StudentRecord[] = data.success && Array.isArray(data.students) ? data.students : [];
+        const serverIds = new Set(server.map((s) => s.id));
+        const localOnly = local.filter((s) => !serverIds.has(s.id));
+
+        if (localOnly.length > 0) {
+          // Backup data lokal yang belum ada di server, lalu muat ulang dari server
+          await fetch('/api/students', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ records: localOnly })
+          });
+          const res2 = await fetch('/api/students');
+          const data2 = await res2.json();
+          if (data2.success && Array.isArray(data2.students)) {
+            setStudents(data2.students);
+            try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data2.students)); } catch {}
+            return;
+          }
+        }
+
+        // Cache lokal disetel ulang ke isi server agar data lintas perangkat tidak tercampur
+        setStudents(server);
+        try { localStorage.setItem(STORAGE_KEY, JSON.stringify(server)); } catch {}
       } catch (e) {
         console.error("Gagal memuat data siswa dari server:", e);
       }
