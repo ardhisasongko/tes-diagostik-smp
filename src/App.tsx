@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { X } from 'lucide-react';
 import { Navbar } from './components/Navbar';
 import { StudentPortal } from './components/StudentPortal';
@@ -18,6 +18,15 @@ import {
 
 const STORAGE_KEY = 'grade9_english_diagnostic_students_v1';
 
+// Representasi kanonik record untuk mendeteksi perubahan antar perangkat tanpa menulis ulang semua data
+const canon = (o: unknown): string => {
+  if (Array.isArray(o)) return '[' + o.map(canon).join(',') + ']';
+  if (o && typeof o === 'object') {
+    return '{' + (Object.keys(o as Record<string, unknown>)).sort().map(k => JSON.stringify(k) + ':' + canon((o as Record<string, unknown>)[k])).join(',') + '}';
+  }
+  return JSON.stringify(o);
+};
+
 export default function App() {
   const [students, setStudents] = useState<StudentRecord[]>(() => {
     try {
@@ -31,6 +40,9 @@ export default function App() {
     }
     return [];
   });
+
+  // Snapshot isi server yang terakhir disinkron (id -> canon) untuk delta-sync
+  const syncedRef = useRef<Map<string, string>>(new Map());
 
   const [activeTab, setActiveTab] = useState<'student-portal' | 'form' | 'dashboard' | 'list' | 'rubric'>('dashboard');
   const [selectedStudentReport, setSelectedStudentReport] = useState<StudentRecord | null>(null);
@@ -191,6 +203,9 @@ export default function App() {
         }
 
         const server: StudentRecord[] = data.success && Array.isArray(data.students) ? data.students : [];
+
+        // Isi snapshot awal dari server agar tidak ada write ulang yang tidak perlu
+        syncedRef.current = new Map(server.map((s) => [s.id, canon(s)]));
         const serverIds = new Set(server.map((s) => s.id));
         const localOnly = local.filter((s) => !serverIds.has(s.id));
 
@@ -205,6 +220,7 @@ export default function App() {
           const data2 = await res2.json();
           if (data2.success && Array.isArray(data2.students)) {
             setStudents(data2.students);
+            syncedRef.current = new Map(data2.students.map((s) => [s.id, canon(s)]));
             try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data2.students)); } catch {}
             return;
           }
@@ -219,7 +235,7 @@ export default function App() {
     })();
   }, []);
 
-  // Save to localStorage + sync to server on change
+  // Save to localStorage + sync only changed records to server (delta) agar hemat Blob
   useEffect(() => {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(students));
@@ -227,13 +243,20 @@ export default function App() {
       console.error("Gagal menyimpan ke localStorage:", e);
     }
 
-    if (students.length === 0) return;
+    const changed = students.filter(s => syncedRef.current.get(s.id) !== canon(s));
+    if (changed.length === 0) return;
     const t = setTimeout(() => {
       fetch('/api/students', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ records: students })
-      }).catch((e) => console.error("Gagal sinkron data ke server:", e));
+        body: JSON.stringify({ records: changed })
+      })
+        .catch((e) => console.error("Gagal sinkron data ke server:", e))
+        // Catat snapshot agar perubahan berikutnya tidak dikirim ulang
+        .then(() => {
+          syncedRef.current = new Map(syncedRef.current);
+          for (const s of changed) syncedRef.current.set(s.id, canon(s));
+        });
     }, 600);
     return () => clearTimeout(t);
   }, [students]);
