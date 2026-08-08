@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { 
   Users, 
   Sparkles, 
@@ -15,7 +15,7 @@ import {
   MessageSquare,
   Play
 } from 'lucide-react';
-import { StudentRecord } from '../types';
+import { StudentRecord, CLASS_OPTIONS } from '../types';
 
 interface ClassDashboardProps {
   students: StudentRecord[];
@@ -32,9 +32,15 @@ export const ClassDashboard: React.FC<ClassDashboardProps> = ({
   isBatchEvaluating,
   onNavigateToForm
 }) => {
-  const total = students.length;
-  const evaluatedStudents = students.filter(s => s.status === 'evaluated' && s.evaluation);
-  const pendingStudents = students.filter(s => s.status === 'pending' || !s.evaluation);
+  const [selectedClass, setSelectedClass] = useState<string>('ALL');
+
+  // Hanya hitung untuk kelas yang dipilih agar data tidak tercampur
+  const isClassMatch = (s: StudentRecord) =>
+    selectedClass === 'ALL' || (s.className || '9A') === selectedClass;
+
+  const total = students.filter(isClassMatch).length;
+  const evaluatedStudents = students.filter(s => isClassMatch(s) && s.status === 'evaluated' && s.evaluation);
+  const pendingStudents = students.filter(s => isClassMatch(s) && (s.status === 'pending' || !s.evaluation));
 
   const greenStudents = evaluatedStudents.filter(s => s.evaluation?.overallColor === '🟩');
   const yellowStudents = evaluatedStudents.filter(s => s.evaluation?.overallColor === '🟨');
@@ -66,7 +72,7 @@ export const ClassDashboard: React.FC<ClassDashboardProps> = ({
             <TrendingUp className="w-4 h-4 text-amber-400" /> SMP PLUS AT-THAHIRIN • Pembelajaran Berdiferensiasi
           </span>
           <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
-            Dashboard Diagnostik Kelas 9
+            Dashboard Diagnostik Kelas {selectedClass === 'ALL' ? 'Semua' : selectedClass}
           </h2>
           <p className="text-xs sm:text-sm text-slate-300 font-medium">
             Total <span className="font-bold text-white">{total}</span> Siswa Terdaftar • <span className="font-bold text-emerald-400">{evaluatedStudents.length}</span> Siswa Ter-evaluasi
@@ -91,6 +97,42 @@ export const ClassDashboard: React.FC<ClassDashboardProps> = ({
           >
             <span>+ Input Siswa Baru</span>
           </button>
+        </div>
+      </div>
+
+      {/* Filter Kelas */}
+      <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-4 shadow-sm flex flex-wrap items-center justify-between gap-3">
+        <span className="text-xs font-extrabold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+          <Users className="w-4 h-4 text-indigo-600 dark:text-indigo-400" /> Filter Kelas:
+        </span>
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            onClick={() => setSelectedClass('ALL')}
+            className={`px-4 py-2 rounded-xl text-xs font-bold transition ${
+              selectedClass === 'ALL'
+                ? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 shadow'
+                : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
+            }`}
+          >
+            Semua Kelas ({students.length})
+          </button>
+          {CLASS_OPTIONS.map((cls) => {
+            const count = students.filter(s => (s.className || '9A') === cls).length;
+            if (count === 0) return null;
+            return (
+              <button
+                key={cls}
+                onClick={() => setSelectedClass(cls)}
+                className={`px-4 py-2 rounded-xl text-xs font-bold transition ${
+                  selectedClass === cls
+                    ? 'bg-indigo-600 text-white shadow'
+                    : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
+                }`}
+              >
+                {cls} ({count})
+              </button>
+            );
+          })}
         </div>
       </div>
 

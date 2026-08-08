@@ -11,7 +11,7 @@ import {
   CheckCircle2,
   AlertCircle
 } from 'lucide-react';
-import { StudentRecord, LevelColor } from '../types';
+import { StudentRecord, LevelColor, CLASS_OPTIONS } from '../types';
 
 interface StudentListTableProps {
   students: StudentRecord[];
@@ -36,13 +36,16 @@ export const StudentListTable: React.FC<StudentListTableProps> = ({
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterTier, setFilterTier] = useState<string>('ALL');
+  const [filterClass, setFilterClass] = useState<string>('ALL');
 
-  // Filter students by search and tier
+  // Filter students by search, class, and tier
   const filteredStudents = students.filter(student => {
     const matchesSearch = student.studentName.toLowerCase().includes(searchQuery.toLowerCase()) ||
       (student.className && student.className.toLowerCase().includes(searchQuery.toLowerCase()));
 
     if (!matchesSearch) return false;
+
+    if (filterClass !== 'ALL' && (student.className || '9A') !== filterClass) return false;
 
     if (filterTier === 'ALL') return true;
     if (filterTier === 'HIJAU') return student.evaluation?.overallColor === '🟩';
@@ -105,8 +108,39 @@ export const StudentListTable: React.FC<StudentListTableProps> = ({
           />
         </div>
 
-        {/* Tier Tabs */}
-        <div className="flex items-center space-x-1.5 overflow-x-auto w-full sm:w-auto text-xs">
+        <div className="flex items-center gap-1.5 overflow-x-auto w-full sm:w-auto text-xs">
+          <button
+            onClick={() => setFilterClass('ALL')}
+            className={`px-3.5 py-2 rounded-xl font-bold transition whitespace-nowrap ${
+              filterClass === 'ALL'
+                ? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900'
+                : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
+            }`}
+          >
+            Semua Kelas
+          </button>
+          {CLASS_OPTIONS.map((cls) => {
+            const count = students.filter(s => (s.className || '9A') === cls).length;
+            if (count === 0) return null;
+            return (
+              <button
+                key={cls}
+                onClick={() => setFilterClass(cls)}
+                className={`px-3.5 py-2 rounded-xl font-bold transition whitespace-nowrap ${
+                  filterClass === cls
+                    ? 'bg-indigo-600 text-white'
+                    : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
+                }`}
+              >
+                {cls} ({count})
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Tier Tabs */}
+      <div className="flex items-center space-x-1.5 overflow-x-auto w-full sm:w-auto text-xs">
           <button
             onClick={() => setFilterTier('ALL')}
             className={`px-3.5 py-2 rounded-xl font-bold transition ${
@@ -151,7 +185,6 @@ export const StudentListTable: React.FC<StudentListTableProps> = ({
             🟥 Perlu Bimbingan
           </button>
         </div>
-      </div>
 
       {/* Table Area */}
       <div className="overflow-x-auto rounded-2xl border border-slate-200 dark:border-slate-800">

@@ -40,7 +40,7 @@ export default function App() {
   const [isPromptModalOpen, setIsPromptModalOpen] = useState(false);
   const [hasCopiedPrompt, setHasCopiedPrompt] = useState(false);
   const [isEvaluatingId, setIsEvaluatingId] = useState<string | null>(null);
-  const [teacherMode, setTeacherMode] = useState<boolean>(true);
+  const [teacherMode, setTeacherMode] = useState<boolean>(false);
   const [isPinModalOpen, setIsPinModalOpen] = useState(false);
   const [pinValue, setPinValue] = useState('');
   const [pinError, setPinError] = useState('');

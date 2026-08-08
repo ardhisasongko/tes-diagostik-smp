@@ -62,7 +62,12 @@ export async function deleteStudent(id: string): Promise<void> {
   await del(pathFor(id));
 }
 
-export async function getSettings(): Promise<{ teacherMode?: boolean }> {
+export interface TeacherSettings {
+  teacherMode?: boolean;
+  unlockedAt?: string;
+}
+
+export async function getSettings(): Promise<TeacherSettings> {
   if (!isStoreConfigured()) return {};
   try {
     const { blobs } = await list({ prefix: SETTINGS_PATH });
@@ -81,7 +86,7 @@ export async function getSettings(): Promise<{ teacherMode?: boolean }> {
   }
 }
 
-export async function saveSettings(settings: { teacherMode: boolean }): Promise<void> {
+export async function saveSettings(settings: TeacherSettings): Promise<void> {
   if (!isStoreConfigured()) return;
   await put(SETTINGS_PATH, JSON.stringify(settings), { access: 'public', allowOverwrite: true });
 }

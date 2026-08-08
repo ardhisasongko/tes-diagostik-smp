@@ -59,6 +59,8 @@ export const LISTENING_TARGET_KEYWORDS = [
 
 export const WRITING_TARGET_PATTERNS = ['want to', 'because', 'plan to'];
 
+export const CLASS_OPTIONS = ['7A', '7B', '8A', '8B', '9A', '9B'];
+
 export const SPEAKING_QUICK_TAGS = [
   { id: 'lancar', label: 'Berbicara Lancar', color: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300', tier: '🟩' },
   { id: 'kontak_mata', label: 'Kontak Mata Baik', color: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300', tier: '🟩' },
